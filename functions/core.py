@@ -14,30 +14,41 @@ def get_other(string):
     ret = ''
     find = False
     for c in string:
-        if c == ' ':
+        if c == ' ' and not find:
             find = True
+            continue
         if not find:
             continue
         ret += c
     return ret
 
 
-def add(peer, params):
+def change_money(peer, params):
+    tmp = params.split(' ')
+    if len(tmp) != 2:
+        send_error(peer, 'Invalid arguments')
+        return
+    change_type = tmp[0]
+    money = tmp[1]
+    if not (change_type == 'set' or change_type == 'add' or change_type == 'remove'):
+        send_error(peer, 'Invalid command type')
+        return
+    #TODO type realization
     bot.messaging.send_message(
         peer,
-        'Add command detected'
+        'Successfully changed'
     )
 
 
-def send_error(peer):
+def send_error(peer, error_msg='Invalid command'):
     bot.messaging.send_message(
         peer,
-        'Invalid command'
+        error_msg
     )
 
 
 command_list = {
-    'add': add
+    'change_money': change_money
 }
 
 def check(peer, command):
