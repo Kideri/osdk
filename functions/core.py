@@ -26,35 +26,61 @@ def get_other(string):
 def change_money(peer, params):
     tmp = params.split(' ')
     if len(tmp) != 2:
-        send_error(peer, 'Invalid arguments')
+        send_message(
+            peer, 
+            'Invalid arguments'
+        )
         return
     change_type = tmp[0]
     money = tmp[1]
     if not (change_type == 'set' or change_type == 'add' or change_type == 'remove'):
-        send_error(peer, 'Invalid command type')
+        send_message(
+            peer, 
+            'Invalid command type'
+        )
         return
     #TODO type realization
-    bot.messaging.send_message(
+    send_message(
         peer,
         'Successfully changed'
     )
 
 
-def send_error(peer, error_msg='Invalid command'):
+def send_message(peer, msg):
     bot.messaging.send_message(
         peer,
-        error_msg
+        msg
+    )
+
+
+def buy(peer, params):
+    tmp = params.split(' ')
+    if not (len(tmp) == 2 or len(tmp) == 3):
+        send_message(peer, 'Invalid arguments')
+        return
+    name = tmp[0]
+    price = int(tmp[1])
+    count = 1
+    if len(tmp) == 3:
+        count = int(tmp[2])
+    send_message(
+        peer,
+        'You bought ' + str(count) + ' products with total cost ' + str(price * count)
     )
 
 
 command_list = {
-    'change_money': change_money
+    'change_money': change_money,
+    'buy': buy,
 }
 
 def check(peer, command):
     params = get_other(command)
     command = get_first(command)
     if not command in command_list:
-        send_error(peer)
+        send_message(
+            peer, 
+            'Invalid command'
+        )
         return
     command_list[command](peer, params)
