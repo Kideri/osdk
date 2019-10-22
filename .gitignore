@@ -1,5 +1,4 @@
 .vscode
 */__pycache__/*
 venv
-config/core.py
 __pycache__
