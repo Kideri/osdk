@@ -9,3 +9,7 @@ bot = DialogBot.get_secure_bot(
     token,
     verbose=True
 )
+
+DBHOST = 'localhost'
+BDPORT = 27017
+DBNAME = 'bot3'
