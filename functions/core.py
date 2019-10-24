@@ -83,6 +83,7 @@ def buy(peer: str, params: str) -> bool:
     count = 1
     if len(tmp) == 3:
         count = int(tmp[2])
+    core_db.buy(int(peer.id), name, price, count)
     send_message(
         peer,
         'You bought ' + str(count) + ' products with total cost ' + str(price * count)
