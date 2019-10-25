@@ -38,25 +38,25 @@ def get_product_count(user_id: str, name: str, price: int) -> int:
 def edit_product(user_id: int, name: str, price: int, new_name=None, new_price=None, count=None) -> None:
     product_list = collection.find_one({"user_id": str(user_id), 'list.name': name, 'list.price': str(price)})['list']
     product = {}
+    ind = 0
     for pr in product_list:
         if pr['name'] == name and pr['price'] == str(price):
             product = pr
             break
+        ind += 1
     if new_name:
         product['name'] = new_name
     if new_price:
         product['price'] = new_price
     if count:
         product['count'] = count
-    collection.update(
+    collection.update_one(
         {
-            'user_id': str(user_id),
-            'list.name': name,
-            'list.price': str(price)
+            'user_id': str(user_id)
         },
         {
             '$set': {
-                'list.$': product
+                'list.'+str(ind): product
             }
         }
     )
@@ -149,3 +149,10 @@ def show_money(user_id: int) -> bool or int:
     if not check_user(user_id):
         return False
     return get_money(user_id)
+
+
+def get_list(user_id: int) -> bool or dict:
+    if not check_user(user_id):
+        return False
+    products = collection.find_one({'user_id': str(user_id)})['list']
+    return products

@@ -40,9 +40,7 @@ def change_money(peer, params: str) -> bool:
             'Invalid command type'
         )
         return False
-    #TODO type realization
     res = False
-    # print(peer)
     if change_type == 'set':
         core_db.set_money(int(peer.id), int(money))
     if change_type == 'add':
@@ -106,13 +104,67 @@ def show(peer, params: str) -> bool:
         return False
     send_message(
         peer,
-        'You have -> ' + str(money) + ' money left.'
+        'You have ' + str(money) + ' money left.'
     )
+
+
+def show_list(peer, params: str) -> bool:
+    products = core_db.get_list(int(peer.id))
+    if not products:
+        send_message(
+            peer,
+            'User does not exist.\nFirst you need to set your money'
+        )
+        return False
+    products_str = 'Your list:\n'
+    for product in products:
+        products_str += str(product['name']) + ': ' + str(product['count']) + ' for ' + str(product['price']) + \
+                        ' (total: ' + str(int(product['price']) * int(product['count'])) + ')\n'
+    send_message(
+        peer,
+        products_str
+    )
+    return True
+
+
+transport = {
+    'name': 'new_name',
+    'price': 'new_price',
+    'count': 'count'
+}
+
+#TODO remove_product, merge same products
+def edit_product(peer, params: str) -> bool:
+    tmp = params.split(' ')
+    if not len(tmp) == 4:
+        send_message(peer, 'Invalid arguments')
+        return False
+    name = tmp[0]
+    price = int(tmp[1])
+    upd_field_name = tmp[2]
+    upd_field_value = tmp[3]
+    if not core_db.check_user(str(peer.id)):
+        send_message(
+            peer,
+            'User does not exist.\nFirst you need to set your money'
+        )
+        return False
+    params = {
+        transport[upd_field_name]: upd_field_value
+    }
+    core_db.edit_product(int(peer.id), name, price, **params)
+    send_message(
+        peer,
+        'Product successfully updated'
+    )
+        
 
 command_list = {
     'change_money': change_money,
     'buy': buy,
-    'show': show
+    'show': show,
+    'show_list': show_list,
+    'edit_product': edit_product,
 }
 
 def check(peer: str, command: str) -> bool:
