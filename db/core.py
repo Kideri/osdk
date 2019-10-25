@@ -143,3 +143,9 @@ def buy(user_id: int, name: str, price: int, count: int) -> bool:
         edit_product(user_id, name, price, count=get_product_count(user_id, name, price) + count)
     show_db()
     return True
+
+
+def show_money(user_id: int) -> bool or int:
+    if not check_user(user_id):
+        return False
+    return get_money(user_id)

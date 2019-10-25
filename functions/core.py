@@ -24,7 +24,7 @@ def get_other(string: str) -> str:
     return ret
 
 
-def change_money(peer: str, params: str) -> bool:
+def change_money(peer, params: str) -> bool:
     tmp = params.split(' ')
     if len(tmp) != 2:
         send_message(
@@ -66,14 +66,14 @@ def change_money(peer: str, params: str) -> bool:
     return True
 
 
-def send_message(peer: str, msg: str) -> None:
+def send_message(peer, msg: str) -> None:
     bot.messaging.send_message(
         peer,
         msg
     )
 
 
-def buy(peer: str, params: str) -> bool:
+def buy(peer, params: str) -> bool:
     tmp = params.split(' ')
     if not (len(tmp) == 2 or len(tmp) == 3):
         send_message(peer, 'Invalid arguments')
@@ -83,16 +83,36 @@ def buy(peer: str, params: str) -> bool:
     count = 1
     if len(tmp) == 3:
         count = int(tmp[2])
-    core_db.buy(int(peer.id), name, price, count)
+    if not core_db.buy(int(peer.id), name, price, count):
+        send_message(
+            peer,
+            'User does not exist.\nFirst you need to set your money'
+        )
+        return False
     send_message(
         peer,
         'You bought ' + str(count) + ' products with total cost ' + str(price * count)
     )
     return True
 
+
+def show(peer, params: str) -> bool:
+    money = core_db.show_money(int(peer.id))
+    if not money:
+        send_message(
+            peer,
+            'User does not exist.\nFirst you need to set your money'
+        )
+        return False
+    send_message(
+        peer,
+        'You have -> ' + str(money) + ' money left.'
+    )
+
 command_list = {
     'change_money': change_money,
     'buy': buy,
+    'show': show
 }
 
 def check(peer: str, command: str) -> bool:
