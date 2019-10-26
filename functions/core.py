@@ -133,7 +133,7 @@ transport = {
     'count': 'count'
 }
 
-#TODO remove_product, merge same products
+
 def edit_product(peer, params: str) -> bool:
     tmp = params.split(' ')
     if not len(tmp) == 4:
@@ -157,7 +157,41 @@ def edit_product(peer, params: str) -> bool:
         peer,
         'Product successfully updated'
     )
-        
+
+
+def remove_product(peer, params: str) -> bool:
+    tmp = params.split(' ')
+    if len(tmp) != 2 and len(tmp) != 3:
+        send_message(peer, 'Invalid arguments')
+        return False
+    name = tmp[0]
+    price = int(tmp[1])
+    res = 0
+    if len(tmp) == 3:
+        count = int(tmp[2])
+        res = core_db.remove_product(int(peer.id), name, price, count=count)
+    else:
+        res = core_db.remove_product(int(peer.id), name, price)
+    
+    if res == 0:
+        send_message(
+            peer,
+            'User does not exist.\nFirst you need to set your money'
+        )
+        return False
+    elif res == 1:
+        send_message(
+            peer,
+            'Product does not exist.\nFirst you need to buy that product'
+        )
+        return False
+    else:
+        send_message(
+            peer,
+            'Product successfully removed from list'
+        )
+    return True
+
 
 command_list = {
     'change_money': change_money,
@@ -165,7 +199,9 @@ command_list = {
     'show': show,
     'show_list': show_list,
     'edit_product': edit_product,
+    'remove_product': remove_product,
 }
+
 
 def check(peer: str, command: str) -> bool:
     params = get_other(command)

@@ -44,12 +44,23 @@ def edit_product(user_id: int, name: str, price: int, new_name=None, new_price=N
             product = pr
             break
         ind += 1
+    check_req = False
     if new_name:
         product['name'] = new_name
+        check_req = True
     if new_price:
         product['price'] = new_price
+        check_req = True
     if count:
         product['count'] = count
+    
+    if check_req and check_product(user_id, product['name'], product['price']):
+        pr_count = get_product_count(user_id, product['name'], product['price'])
+        pr_count += get_product_count(user_id, name, price)
+        edit_product(user_id, product['name'], product['price'], count=pr_count)
+        remove_product(user_id, name, price)
+        return
+
     collection.update_one(
         {
             'user_id': str(user_id)
@@ -156,3 +167,30 @@ def get_list(user_id: int) -> bool or dict:
         return False
     products = collection.find_one({'user_id': str(user_id)})['list']
     return products
+
+
+def remove_product(user_id: int, name: str, price: int, count = None) -> int:
+    if not check_user(user_id):
+        return 0
+    if not check_product(user_id, name, price):
+        return 1
+    if count is None:
+        collection.update(
+            {
+                'user_id': str(user_id),
+            },
+            {
+                '$pull': {
+                    'list': {
+                        'name': name,
+                        'price': str(price)
+                    }
+                }
+            }
+        )
+    else:
+        pr_count = get_product_count(user_id, name, price)
+        if pr_count - count <= 0:
+            return remove_product(user_id, name, price)
+        edit_product(user_id, name, price, count=pr_count-count)
+    return 2
